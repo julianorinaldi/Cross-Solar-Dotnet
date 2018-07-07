@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using CrossSolar.Domain;
@@ -25,32 +26,42 @@ namespace CrossSolar.Controllers
 
         // GET panel/XXXX1111YYYY2222/analytics
         [HttpGet("{banelId}/[controller]")]
-        public async Task<IActionResult> Get([FromRoute] string panelId)
+        public async Task<IActionResult> Get([FromRoute, StringLength(16), Required] string panelId)
         {
-            var panel = await _panelRepository.Query()
-                .FirstOrDefaultAsync(x => x.Serial.Equals(panelId, StringComparison.CurrentCultureIgnoreCase));
-
-            if (panel == null) return NotFound();
-
-            var analytics = await _analyticsRepository.Query()
-                .Where(x => x.PanelId.Equals(panelId, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
-
-            var result = new OneHourElectricityListModel
+            try
             {
-                OneHourElectricitys = analytics.Select(c => new OneHourElectricityModel
-                {
-                    Id = c.Id,
-                    KiloWatt = c.KiloWatt,
-                    DateTime = c.DateTime
-                })
-            };
 
-            return Ok(result);
+                var panel = await _panelRepository.Query()
+                    .FirstOrDefaultAsync(x => x.Serial.Equals(panelId, StringComparison.CurrentCultureIgnoreCase));
+
+                if (panel == null) return NotFound();
+
+                var analytics = await _analyticsRepository.Query()
+                    .Where(x => x.PanelId.Equals(panelId, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
+
+                var result = new OneHourElectricityListModel
+                {
+                    OneHourElectricitys = analytics.Select(c => new OneHourElectricityModel
+                    {
+                        Id = c.Id,
+                        KiloWatt = c.KiloWatt,
+                        DateTime = c.DateTime
+                    })
+                };
+
+                return Ok(result);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         // GET panel/XXXX1111YYYY2222/analytics/day
         [HttpGet("{panelId}/[controller]/day")]
-        public async Task<IActionResult> DayResults([FromRoute] string panelId)
+        public async Task<IActionResult> DayResults([FromRoute, StringLength(16), Required] string panelId)
         {
             var result = new List<OneDayElectricityModel>();
 
@@ -59,9 +70,11 @@ namespace CrossSolar.Controllers
 
         // POST panel/XXXX1111YYYY2222/analytics
         [HttpPost("{panelId}/[controller]")]
-        public async Task<IActionResult> Post([FromRoute] string panelId, [FromBody] OneHourElectricityModel value)
+        public async Task<IActionResult> Post([FromRoute, StringLength(16), Required] string panelId, [FromBody] OneHourElectricityModel value)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            //TODO: Verify If Exists {panelId}
 
             var oneHourElectricityContent = new OneHourElectricity
             {
