@@ -1,7 +1,4 @@
-# Cross-Solar-Dotnet
-Evaluation for the C# (.NET) Software Engineer position.
-
-Project Assessment:
+﻿Project Assessment:
 	Cross-Solar is a backend web application created by a startup company called “Green Energy Analytics” in Texas - USA. This application collects energy analytics for solar panels every hour.
 
 Notes:
@@ -41,3 +38,5 @@ Production Environment:
   2) Commit everything to using (git add --all && git commit -m "My submission")
   3) Create patch file with name without spaces 'cross-solar-dotnet_<YourNameHere>.patch', using the specified tag as the starting point (git format-patch initial-commit --stdout > cross-solar-dotnet_<yournamehere>.patch)
   4) Store your file in a shared location where Crossover team can access and download it for evaluation. and add your sharable link in the answer field of this question.
+
+
