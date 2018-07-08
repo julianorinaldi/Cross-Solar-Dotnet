@@ -51,7 +51,7 @@ namespace CrossSolar.Tests.Controller
                 KiloWatt = 100,
                 PanelId = panelId
             }
-                }            .AsQueryable().BuildMock();
+                }.AsQueryable().BuildMock();
 
             _panelRepositoryMock.Setup(m => m.Query()).Returns(mockPanels.Object);
             _analyticsRepositoryMock.Setup(m => m.Query()).Returns(mockOneHourElectricities.Object);
@@ -67,24 +67,49 @@ namespace CrossSolar.Tests.Controller
             Assert.Equal(200, okResult.StatusCode);
         }
 
-        /*
         [Fact]
         public async Task Retrieve_DayResultsAnalystics()
         {
             string panelId = "AAAA1111BBBB2222";
 
-            var mockOneDayElectricities = new List<OneDayElectricityModel>() {
-                new OneDayElectricityModel()
+            var mockPanels = new List<Panel>()
+            {
+                new Panel
                 {
-                    DateTime = new DateTime(2018, 7, 7),
-                    Average = 0,
-                    Maximum = 0,
-                    Minimum = 0,
-                    Sum = 0
+                    Brand = "Areva",
+                    Latitude = 12.345678,
+                    Longitude = 98.765543,
+                    Serial = panelId
                 }
             }.AsQueryable().BuildMock();
 
-           // _analyticsRepositoryMock.Setup(m => m.Query()).Returns(mockOneDayElectricities.Object);
+            _panelRepositoryMock.Setup(m => m.Query()).Returns(mockPanels.Object);
+
+            var mockOneDayElectricities = new List<OneHourElectricity>() {
+                new OneHourElectricity()
+                {
+                    Id = 3,
+                    PanelId = panelId,
+                    DateTime = new DateTime(2018, 7, 5),
+                    KiloWatt = 100
+                },
+                new OneHourElectricity()
+                {
+                    Id = 4,
+                    PanelId = panelId,
+                    DateTime = new DateTime(2018, 7, 6),
+                    KiloWatt = 200
+                },
+                new OneHourElectricity()
+                {
+                    Id = 5,
+                    PanelId = panelId,
+                    DateTime = new DateTime(2018, 7, 7),
+                    KiloWatt = 300
+                }
+            }.AsQueryable().BuildMock();
+
+            _analyticsRepositoryMock.Setup(m => m.Query()).Returns(mockOneDayElectricities.Object);
 
             // Act
             var result = await _analyticsController.DayResults(panelId);
@@ -96,7 +121,7 @@ namespace CrossSolar.Tests.Controller
             Assert.NotNull(okResult);
             Assert.Equal(200, okResult.StatusCode);
         }
-        */
+
 
         [Fact]
         public async Task Create_PostAnalystics()
