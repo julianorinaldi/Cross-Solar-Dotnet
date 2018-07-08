@@ -122,7 +122,6 @@ namespace CrossSolar.Tests.Controller
                 DateTime = DateTime.Now,
                 KiloWatt = 100
             };
-
             // Act
             var result = await _analyticsController.Post(panelId, oneHourElectricityModel);
 
