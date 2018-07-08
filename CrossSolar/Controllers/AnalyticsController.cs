@@ -28,41 +28,35 @@ namespace CrossSolar.Controllers
         [HttpGet("{banelId}/[controller]")]
         public async Task<IActionResult> Get([FromRoute, StringLength(16), Required] string panelId)
         {
-            try
+            var panel = await _panelRepository.Query()
+                .FirstOrDefaultAsync(x => x.Serial.Equals(panelId, StringComparison.CurrentCultureIgnoreCase));
+
+            if (panel == null) return NotFound();
+
+            var analytics = await _analyticsRepository.Query()
+                .Where(x => x.PanelId.Equals(panelId, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
+
+            var result = new OneHourElectricityListModel
             {
-
-                var panel = await _panelRepository.Query()
-                    .FirstOrDefaultAsync(x => x.Serial.Equals(panelId, StringComparison.CurrentCultureIgnoreCase));
-
-                if (panel == null) return NotFound();
-
-                var analytics = await _analyticsRepository.Query()
-                    .Where(x => x.PanelId.Equals(panelId, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
-
-                var result = new OneHourElectricityListModel
+                OneHourElectricitys = analytics.Select(c => new OneHourElectricityModel
                 {
-                    OneHourElectricitys = analytics.Select(c => new OneHourElectricityModel
-                    {
-                        Id = c.Id,
-                        KiloWatt = c.KiloWatt,
-                        DateTime = c.DateTime
-                    })
-                };
+                    Id = c.Id,
+                    KiloWatt = c.KiloWatt,
+                    DateTime = c.DateTime
+                })
+            };
 
-                return Ok(result);
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            return Ok(result);
         }
 
         // GET panel/XXXX1111YYYY2222/analytics/day
         [HttpGet("{panelId}/[controller]/day")]
         public async Task<IActionResult> DayResults([FromRoute, StringLength(16), Required] string panelId)
         {
+
+            //TODO: Bug Fix - Get Elements - Verificar enunciado
+            //3) A equipe de front-end deseja exibir todos os dados históricos do painel em um gráfico, no qual cada ponto representa a eletricidade gerada por esse painel a cada dia [soma, min, max, média] até o final do dia anterior, seu objetivo é implementar backend parte dessa tarefa, as especificações da API já estão no código, conforme acordado com a equipe do Frontend, e não há problema em implementar essa tarefa sem qualquer otimização.
+
             var result = new List<OneDayElectricityModel>();
 
             return Ok(result);
@@ -74,7 +68,9 @@ namespace CrossSolar.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            //TODO: Verify If Exists {panelId}
+            // BUG FIX - Check Exists Panel
+            if (!_panelRepository.Query().Any(x => x.Serial.Equals(panelId, StringComparison.CurrentCultureIgnoreCase)))
+                return BadRequest();
 
             var oneHourElectricityContent = new OneHourElectricity
             {

@@ -22,11 +22,12 @@ namespace CrossSolar.Tests.Controller
         [Fact]
         public async Task Register_ShouldInsertPanel()
         {
+            // TODO: JULIANO - Verificar quantidade de decimais em Logitude e Latitude (Max 6 digits)
             var panel = new PanelModel
             {
                 Brand = "Areva",
                 Latitude = 12.345678,
-                Longitude = 98.7655432,
+                Longitude = 98.765543,
                 Serial = "AAAA1111BBBB2222"
             };
 

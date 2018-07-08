@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CrossSolar.Domain;
 using CrossSolar.Models;
 using CrossSolar.Repository;
@@ -20,6 +21,7 @@ namespace CrossSolar.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] PanelModel value)
         {
+            
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var panel = new Panel

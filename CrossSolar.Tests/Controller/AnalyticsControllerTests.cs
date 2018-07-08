@@ -8,6 +8,7 @@ using CrossSolar.Models;
 using CrossSolar.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MockQueryable.Moq;
 using Moq;
 using Xunit;
 
@@ -27,29 +28,33 @@ namespace CrossSolar.Tests.Controller
         }
 
         [Fact]
-        public async Task Register_GetAnalystics()
+        public async Task Retrieve_GetAnalystics()
         {
             string panelId = "AAAA1111BBBB2222";
 
-            var panel = new Panel
+            var mockPanels = new List<Panel>()
             {
-                Brand = "Areva",
-                Latitude = 12.345678,
-                Longitude = 98.7655432,
-                Serial = panelId
-            };
+                new Panel
+                {
+                    Brand = "Areva",
+                    Latitude = 12.345678,
+                    Longitude = 98.765543,
+                    Serial = panelId
+                }
+            }.AsQueryable().BuildMock();
 
-            var oneHourElectricity = new OneHourElectricity()
+            var mockOneHourElectricities = new List<OneHourElectricity>() {
+            new OneHourElectricity()
             {
                 DateTime = new DateTime(2018, 7, 7),
                 Id = 1,
                 KiloWatt = 100,
                 PanelId = panelId
-            };
+            }
+                }            .AsQueryable().BuildMock();
 
-            
-            _panelRepositoryMock.Setup(m => m.Query()).Returns(new List<Panel>() { panel }.AsQueryable());
-            _analyticsRepositoryMock.Setup(m => m.Query()).Returns(new List<OneHourElectricity>() { oneHourElectricity }.AsQueryable());
+            _panelRepositoryMock.Setup(m => m.Query()).Returns(mockPanels.Object);
+            _analyticsRepositoryMock.Setup(m => m.Query()).Returns(mockOneHourElectricities.Object);
 
             // Act
             var result = await _analyticsController.Get(panelId);
@@ -57,15 +62,60 @@ namespace CrossSolar.Tests.Controller
             // Assert
             Assert.NotNull(result);
 
-            var okResult = result as OkResult;
+            var okResult = result as OkObjectResult;
             Assert.NotNull(okResult);
             Assert.Equal(200, okResult.StatusCode);
         }
 
+        /*
         [Fact]
-        public async Task Register_PostAnalystics()
+        public async Task Retrieve_DayResultsAnalystics()
+        {
+            string panelId = "AAAA1111BBBB2222";
+
+            var mockOneDayElectricities = new List<OneDayElectricityModel>() {
+                new OneDayElectricityModel()
+                {
+                    DateTime = new DateTime(2018, 7, 7),
+                    Average = 0,
+                    Maximum = 0,
+                    Minimum = 0,
+                    Sum = 0
+                }
+            }.AsQueryable().BuildMock();
+
+           // _analyticsRepositoryMock.Setup(m => m.Query()).Returns(mockOneDayElectricities.Object);
+
+            // Act
+            var result = await _analyticsController.DayResults(panelId);
+
+            // Assert
+            Assert.NotNull(result);
+
+            var okResult = result as OkObjectResult;
+            Assert.NotNull(okResult);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+        */
+
+        [Fact]
+        public async Task Create_PostAnalystics()
         {
             string panelId = "1234567890987654";
+
+            var mockPanels = new List<Panel>()
+            {
+                new Panel
+                {
+                    Brand = "Areva",
+                    Latitude = 12.345678,
+                    Longitude = 98.765543,
+                    Serial = panelId
+                }
+            }.AsQueryable().BuildMock();
+
+            _panelRepositoryMock.Setup(m => m.Query()).Returns(mockPanels.Object);
+
             var oneHourElectricityModel = new OneHourElectricityModel
             {
                 Id = 1,
