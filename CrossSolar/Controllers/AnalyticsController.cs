@@ -113,5 +113,46 @@ namespace CrossSolar.Controllers
 
             return Created($"panel/{panelId}/analytics/{result.Id}", result);
         }
+
+        // POST panel/v2/XXXX1111YYYY2222/analytics
+        [HttpPost("v2/{panelId}/[controller]")]
+        public async Task<IActionResult> Post([FromRoute, StringLength(16), Required] string panelId, [FromBody] OneHourElectricityAmountModel value)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            if (!_panelRepository.Query().Any(x => x.Serial.Equals(panelId, StringComparison.CurrentCultureIgnoreCase)))
+                return BadRequest();
+
+            double amountKiloWatt = 0;
+            switch (value.TypeWatt)
+            {
+                case UnitTypeWatt.KiloWatt:
+                    amountKiloWatt = value.Amount;
+                    break;
+
+                case UnitTypeWatt.Watt:
+                    amountKiloWatt = value.Amount / 1000;
+                    break;
+            }
+
+            var oneHourElectricityContent = new OneHourElectricity
+            {
+                PanelId = panelId,
+                KiloWatt = amountKiloWatt,
+                DateTime = DateTime.UtcNow
+            };
+
+            await _analyticsRepository.InsertAsync(oneHourElectricityContent);
+
+            var result = new OneHourElectricityAmountModel
+            {
+                Id = oneHourElectricityContent.Id,
+                Amount = oneHourElectricityContent.KiloWatt,
+                TypeWatt = UnitTypeWatt.KiloWatt,
+                DateTime = oneHourElectricityContent.DateTime
+            };
+
+            return Created($"panel/v2/{panelId}/analytics/{result.Id}", result);
+        }
     }
 }

@@ -157,5 +157,89 @@ namespace CrossSolar.Tests.Controller
             Assert.NotNull(createdResult);
             Assert.Equal(201, createdResult.StatusCode);
         }
+
+        [Fact]
+        public async Task Create_PostAnalystics_V2_UnitTypeWatt_KiloWatt()
+        {
+            string panelId = "1234567890987654";
+
+            var mockPanels = new List<Panel>()
+            {
+                new Panel
+                {
+                    Brand = "Areva",
+                    Latitude = 12.345678,
+                    Longitude = 98.765543,
+                    Serial = panelId
+                }
+            }.AsQueryable().BuildMock();
+
+            _panelRepositoryMock.Setup(m => m.Query()).Returns(mockPanels.Object);
+
+            var oneHourElectricityAmountModel = new OneHourElectricityAmountModel
+            {
+                Id = 1,
+                DateTime = DateTime.Now,
+                Amount = 1000
+            };
+            // Act
+            var result = await _analyticsController.Post(panelId, oneHourElectricityAmountModel);
+
+            // Assert
+            Assert.NotNull(result);
+
+            var createdResult = result as CreatedResult;
+            Assert.NotNull(createdResult);
+            Assert.Equal(201, createdResult.StatusCode);
+
+            var oneHourElectricityAmountModelReturn = createdResult.Value as OneHourElectricityAmountModel;
+            Assert.NotNull(oneHourElectricityAmountModelReturn);
+
+            // Both KiloWatt
+            Assert.Equal(oneHourElectricityAmountModel.Amount, oneHourElectricityAmountModelReturn.Amount);
+        }
+
+        [Fact]
+        public async Task Create_PostAnalystics_V2_UnitTypeWatt_Watt()
+        {
+            string panelId = "1234567890987654";
+
+            var mockPanels = new List<Panel>()
+            {
+                new Panel
+                {
+                    Brand = "Areva",
+                    Latitude = 12.345678,
+                    Longitude = 98.765543,
+                    Serial = panelId
+                }
+            }.AsQueryable().BuildMock();
+
+            _panelRepositoryMock.Setup(m => m.Query()).Returns(mockPanels.Object);
+
+            var oneHourElectricityAmountModel = new OneHourElectricityAmountModel
+            {
+                Id = 1,
+                DateTime = DateTime.Now,
+                Amount = 100,
+                TypeWatt = UnitTypeWatt.Watt
+            };
+            // Act
+            var result = await _analyticsController.Post(panelId, oneHourElectricityAmountModel);
+
+            // Assert
+            Assert.NotNull(result);
+
+            var createdResult = result as CreatedResult;
+            Assert.NotNull(createdResult);
+            Assert.Equal(201, createdResult.StatusCode);
+
+            var oneHourElectricityAmountModelReturn = createdResult.Value as OneHourElectricityAmountModel;
+            Assert.NotNull(oneHourElectricityAmountModelReturn);
+
+            // Sent Watt, Return KiloWatt
+            double amountKiloWatt = oneHourElectricityAmountModel.Amount / 1000;
+            Assert.Equal(amountKiloWatt, oneHourElectricityAmountModelReturn.Amount);
+        }
     }
 }

@@ -8,8 +8,8 @@ namespace CrossSolar.Models
         public int Id { get; set; }
 
         [Required]
-        [Range(0, 10000000000)]
-        public long KiloWatt { get; set; }
+        [Range(0, 9999999.999)]
+        public double KiloWatt { get; set; }
 
         public DateTime DateTime { get; set; }
     }
